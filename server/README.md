@@ -1,7 +1,7 @@
 # RNF
 
-- Typescript
-- Fastify
-- Knex
-- Zod
-- Eslint
+- [x] - Typescript
+- [x] - Fastify
+- [x] - Knex
+- [x] - Zod
+- [x] - Eslint
