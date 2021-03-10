@@ -1,15 +1,7 @@
-import fastify from 'fastify'
-import { knex } from '../database'
+import { app } from './app'
+import { env } from './env'
 
-const app = fastify()
-
-app.get('/', async () => {
-	const database = await knex('sqlite_schema').select('*')
-
-	return { database }
-})
-
-const PORT = 3333
+const PORT = env.PORT
 
 app
 	.listen({
