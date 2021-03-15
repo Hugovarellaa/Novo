@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto'
 import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { knex } from '../../database'
+import { checkIfExistsSessionId } from '../middlewares/check-if-exists-session-id'
 
 export async function transactionsRoutes(app: FastifyInstance) {
 	app.post('/', async (request, reply) => {
@@ -36,24 +37,28 @@ export async function transactionsRoutes(app: FastifyInstance) {
 		return reply.status(201).send()
 	})
 
-	app.get('/', async () => {
+	app.get('/', { preHandler: [checkIfExistsSessionId] }, async () => {
 		const transactions = await knex('transactions').select('*')
 		return { transactions }
 	})
 
-	app.get('/:id', async (request, reply) => {
-		const getTransactionsParamSchema = z.object({
-			id: z.string(),
-		})
+	app.get(
+		'/:id',
+		{ preHandler: [checkIfExistsSessionId] },
+		async (request, reply) => {
+			const getTransactionsParamSchema = z.object({
+				id: z.string(),
+			})
 
-		const { id } = getTransactionsParamSchema.parse(request.params)
+			const { id } = getTransactionsParamSchema.parse(request.params)
 
-		const transactionById = await knex('transactions').where({ id }).first()
+			const transactionById = await knex('transactions').where({ id }).first()
 
-		return reply.status(200).send(transactionById)
-	})
+			return reply.status(200).send(transactionById)
+		},
+	)
 
-	app.get('/summary', async () => {
+	app.get('/summary', { preHandler: [checkIfExistsSessionId] }, async () => {
 		const summary = await knex('transactions')
 			.sum('amount', { as: 'amount' })
 			.first()
@@ -65,15 +70,19 @@ export async function transactionsRoutes(app: FastifyInstance) {
 		return { summary }
 	})
 
-	app.delete('/:id', async (request, reply) => {
-		const deleteTransactionSchema = z.object({
-			id: z.string(),
-		})
+	app.delete(
+		'/:id',
+		{ preHandler: [checkIfExistsSessionId] },
+		async (request, reply) => {
+			const deleteTransactionSchema = z.object({
+				id: z.string(),
+			})
 
-		const { id } = deleteTransactionSchema.parse(request.params)
+			const { id } = deleteTransactionSchema.parse(request.params)
 
-		await knex('transactions').where({ id }).del()
+			await knex('transactions').where({ id }).del()
 
-		return reply.status(204).send()
-	})
+			return reply.status(204).send()
+		},
+	)
 }
