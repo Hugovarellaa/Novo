@@ -26,7 +26,7 @@ export async function transactionsRoutes(app: FastifyInstance) {
 			.insert({
 				id: randomUUID(),
 				title,
-				amount,
+				amount: type === 'income' ? amount : amount * -1,
 				type,
 				category,
 				session_id: sessionId,
@@ -51,5 +51,29 @@ export async function transactionsRoutes(app: FastifyInstance) {
 		const transactionById = await knex('transactions').where({ id }).first()
 
 		return reply.status(200).send(transactionById)
+	})
+
+	app.get('/summary', async () => {
+		const summary = await knex('transactions')
+			.sum('amount', { as: 'amount' })
+			.first()
+
+		// const summary = await knex('transactions')
+		// 	.sum('amount', { as: 'amount' })
+		// 	.first()
+
+		return { summary }
+	})
+
+	app.delete('/:id', async (request, reply) => {
+		const deleteTransactionSchema = z.object({
+			id: z.string(),
+		})
+
+		const { id } = deleteTransactionSchema.parse(request.params)
+
+		await knex('transactions').where({ id }).del()
+
+		return reply.status(204).send()
 	})
 }
