@@ -28,15 +28,13 @@ describe('Transaction Routes', () => {
 		await app.close()
 	})
 
-	it.only('should be able create a new transaction', async () => {
+	it('should be able create a new transaction', async () => {
 		const response = await request(app.server).post('/transactions').send({
 			title: 'Transaction test',
 			amount: 3000,
 			type: 'income',
 			category: 'Category Test',
 		})
-
-		console.log(response.headers['set-cookie'])
 
 		expect(response.statusCode).toBe(201)
 	})
@@ -51,7 +49,64 @@ describe('Transaction Routes', () => {
 				category: 'Category Test',
 			})
 
-		console.log(createTransaction.headers['set-cookie'])
+		// console.log(createTransaction.headers['set-cookie']) -> forma de buscar os cookies
 		// console.log(response.get('Set-Cookie')) -> forma de buscar os cookies
+
+		const cookies = createTransaction.get('Set-Cookie')
+
+		const ListAllTransactions = await request(app.server)
+			.get('/transactions')
+			.set('Cookie', cookies)
+
+		expect(ListAllTransactions.body.transactions).toEqual([
+			expect.objectContaining({
+				id: expect.any(String),
+				title: 'Transaction test',
+				amount: 3000,
+				category: 'Category Test',
+				type: 'income',
+				created_at: expect.any(String),
+				session_id: expect.any(String),
+			}),
+		])
+	})
+
+	it('should be able to get specific transaction', async () => {
+		const createTransaction = await request(app.server)
+			.post('/transactions')
+			.send({
+				title: 'Transaction test',
+				amount: 3000,
+				type: 'income',
+				category: 'Category Test',
+			})
+
+		// console.log(createTransaction.headers['set-cookie']) -> forma de buscar os cookies
+		// console.log(response.get('Set-Cookie')) -> forma de buscar os cookies
+
+		const cookies = createTransaction.get('Set-Cookie')
+
+		const ListAllTransactions = await request(app.server)
+			.get('/transactions')
+			.set('Cookie', cookies)
+
+		const transactionId = ListAllTransactions.body.transactions[0].id
+
+		const getTransaction = await request(app.server)
+			.get(`/transactions/${transactionId}`)
+			.set('Cookie', cookies)
+
+		expect(getTransaction.statusCode).toEqual(200)
+		expect(getTransaction.body).toEqual(
+			expect.objectContaining({
+				id: expect.any(String),
+				title: 'Transaction test',
+				amount: 3000,
+				category: 'Category Test',
+				type: 'income',
+				created_at: expect.any(String),
+				session_id: expect.any(String),
+			}),
+		)
 	})
 })
