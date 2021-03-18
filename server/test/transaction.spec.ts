@@ -110,7 +110,7 @@ describe('Transaction Routes', () => {
 		)
 	})
 
-	it.only('should be able to get the summary', async () => {
+	it('should be able to get the summary', async () => {
 		const createTransaction = await request(app.server)
 			.post('/transactions')
 			.send({
@@ -136,5 +136,30 @@ describe('Transaction Routes', () => {
 		expect(summaryResponse.body.summary).toEqual({
 			amount: 3000,
 		})
+	})
+
+	it('should be able to remove a transaction', async () => {
+		const createTransaction = await request(app.server)
+			.post('/transactions')
+			.send({
+				title: 'Transaction test',
+				amount: 3000,
+				type: 'income',
+				category: 'Category Test',
+			})
+
+		const cookies = createTransaction.get('Set-Cookie')
+
+		const ListAllTransactions = await request(app.server)
+			.get('/transactions')
+			.set('Cookie', cookies)
+
+		const transactionId = ListAllTransactions.body.transactions[0].id
+
+		const deleteTransaction = await request(app.server)
+			.delete(`/transactions/${transactionId}`)
+			.set('Cookie', cookies)
+
+		expect(deleteTransaction.statusCode).toEqual(204)
 	})
 })
