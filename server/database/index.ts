@@ -3,9 +3,12 @@ import { env } from '../src/env'
 
 const knexConfig: Knex.Config = {
 	client: 'sqlite3',
-	connection: {
-		filename: env.DATABASE_URL,
-	},
+	connection:
+		env.DATABASE_CLIENT === 'sqlite'
+			? {
+					filename: env.DATABASE_URL,
+			  }
+			: env.DATABASE_CLIENT,
 
 	useNullAsDefault: true,
 
