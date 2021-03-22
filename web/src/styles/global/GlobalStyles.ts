@@ -16,7 +16,7 @@ export const GlobalStyles = createGlobalStyle`
 
   body, input, select , textarea {
     font-size: 1rem;
-    font-family: "Poppins", sans-serif;
+    font-family: "Roboto", sans-serif;
     font-weight: 400;
     line-height: 160%;
   }
