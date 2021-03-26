@@ -1,9 +1,10 @@
+import { Dashboard } from '../../components/Dashboard'
 import { Container } from './styles'
 
 export function Home() {
 	return (
 		<Container>
-			<h1>Home</h1>
+			<Dashboard />
 		</Container>
 	)
 }
