@@ -44,12 +44,12 @@ class AuthenticateUserService {
       },
     });
     if (!user) {
-      await prismaClient.user.create({
+      user = await prismaClient.user.create({
         data: {
           github_id: id,
           login,
           avatar_url,
-          name,
+          name: name|| "na",
         },
       });
     }
